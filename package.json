@@ -14,7 +14,8 @@
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.1.1",
-    "mongodb": "^4.1.1"
+    "mongodb": "^4.1.1",
+    "superstruct": "^0.15.2"
   },
   "devDependencies": {
     "prettier": "^2.3.2"
