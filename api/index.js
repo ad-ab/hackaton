@@ -9,7 +9,7 @@ const comments = require('./comments');
 const batch = require('./batch');
 
 (async () => {
-  const dbUrl = process.env.APP_DB_URL || "mongodb://localhost:27017";
+  const dbUrl = process.env.APP_DB_URL || 'mongodb://localhost:27017';
 
   const db = await MongoClient.connect(dbUrl, {
     useNewUrlParser: true,
@@ -24,7 +24,6 @@ const batch = require('./batch');
     .use(batch({}));
 
   app.listen(8000);
-  console.log('Listening on 8000 ...');
 })()
-  .then(() => console.log('running'))
+  .then(() => console.log('Listening on 8000 ...'))
   .catch((err) => console.log(`Err: ${err}`));
