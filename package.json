@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "koa": "^2.13.1"
+    "koa": "^2.13.1",
+    "koa-bodyparser": "^4.3.0"
   },
   "devDependencies": {
     "prettier": "^2.3.2"
