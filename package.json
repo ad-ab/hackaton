@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node api"
+    "start": "node api",
+    "format": "prettier --write ./**/*.{js,json,md}"
   },
   "author": "",
   "license": "ISC",
