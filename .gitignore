@@ -106,5 +106,4 @@ dist
 dump.txt
 correctness-test-suite
 
-log.csv
-log.txt
+tmp

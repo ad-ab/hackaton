@@ -1,7 +1,6 @@
 const Koa = require('koa');
 const app = new Koa();
 const bodyParser = require('koa-bodyparser');
-const cors = require('@koa/cors');
 const { MongoClient } = require('mongodb');
 
 const logger = require('./logger');
@@ -10,7 +9,7 @@ const comments = require('./comments');
 const batch = require('./batch');
 
 (async () => {
-  const dbUrl = process.env.APP_DB_URL;
+  const dbUrl = process.env.APP_DB_URL || "mongodb://localhost:27017";
 
   const db = await MongoClient.connect(dbUrl, {
     useNewUrlParser: true,
@@ -20,11 +19,6 @@ const batch = require('./batch');
   app
     .use(bodyParser({ strict: false }))
     .use(logger)
-    .use(
-      cors({
-        allowMethods: 'GET, POST, DELETE',
-      })
-    )
     .use(webpages({ db }))
     .use(comments({ db }))
     .use(batch({}));
