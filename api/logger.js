@@ -25,7 +25,7 @@ module.exports = async function logger(ctx, next) {
     ])
   );
 
-  conter++;
+  counter++;
   if (!(counter % 100)) console.log(counter);
   return next();
 };
