@@ -8,6 +8,7 @@ const webpages = require('./webpages');
 const comments = require('./comments');
 const batch = require('./batch');
 
+const port = process.env.NODE_ENV === 'production' ? 80 : 8000;
 (async () => {
   const dbUrl = process.env.APP_DB_URL || 'mongodb://localhost:27017';
 
@@ -23,7 +24,7 @@ const batch = require('./batch');
     .use(comments({ db }))
     .use(batch({}));
 
-  app.listen(8000);
+  app.listen(port);
 })()
-  .then(() => console.log('Listening on 8000 ...'))
+  .then(() => console.log(`Listening on ${port} ...`))
   .catch((err) => console.log(`Err: ${err}`));
