@@ -24,14 +24,16 @@ module.exports = function webpages({ db }) {
     }
 
     const { author, text, parent: parentId } = ctx.request.body;
+    const { location } = ctx.params;
 
     const collection = db.collection('comments');
     const newComment = {
       _id: uuid(),
+      parentId,
       author,
       text,
+      location,
       created: Date.now(),
-      replies: [],
     };
 
     if (parentId) {
@@ -40,14 +42,9 @@ module.exports = function webpages({ db }) {
         ctx.status = 400;
         return;
       }
-
-      await collection.updateOne(
-        { _id: parentId },
-        { $push: { replies: newComment } }
-      );
-    } else {
-      await collection.insertOne(newComment);
     }
+
+    await collection.insertOne(newComment);
 
     ctx.status = 201;
   }
