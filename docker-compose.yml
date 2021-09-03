@@ -1,0 +1,29 @@
+version: '3'
+services:
+  mongo:
+    container_name: mongo
+    image: mongo:4.4.3
+    ports:
+      - 27017:27017
+    networks:
+      - hack
+
+  api:
+    container_name: api
+    image: api
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    networks:
+      - hack
+    depends_on:
+      - 'mongo'
+    environment:
+      - APP_DB_URL=mongodb://mongo:27017
+    ports:
+      - 8000:8000
+    volumes:
+      - '~/hack:/app/tmp'
+
+networks:
+  hack:

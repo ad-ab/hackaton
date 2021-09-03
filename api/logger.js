@@ -20,7 +20,7 @@ module.exports = async function logger(ctx, next) {
         time,
         method: ctx.method,
         url: ctx.url,
-        body: ctx.request.body ? JSON.stringify(ctx.request.body) : '',
+        // body: ctx.request.body ? JSON.stringify(ctx.request.body) : '',
       },
     ])
   );
