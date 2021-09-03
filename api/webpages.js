@@ -1,9 +1,10 @@
 const Router = require('koa-router');
-const { is, size, object, string, optional } = require('superstruct');
+const { is, size, object, string, nullable } = require('superstruct');
 const { v4: uuid } = require('uuid');
+const getCommentResponseBody = require('./utils/getCommentResponseBody');
 
 module.exports = function webpages({ db }) {
-  return new Router({ prefix: '/webPages/:location/comment' })
+  return new Router({ prefix: '/webPage/:location/comment' })
     .get('/', get)
     .post('/', post)
     .routes();
@@ -16,7 +17,7 @@ module.exports = function webpages({ db }) {
     const CreatePostPayload = object({
       author: size(string(), 1, 36),
       text: size(string(), 5, 128000),
-      parent: optional(size(string(), 1, 36)),
+      parent: nullable(size(string(), 1, 36)),
     });
     if (!is(ctx.request.body, CreatePostPayload)) {
       ctx.status = 400;
@@ -38,7 +39,7 @@ module.exports = function webpages({ db }) {
 
     if (parentId) {
       const parent = await collection.findOne({ _id: parentId });
-      if (!parent) {
+      if (!parent || parent.location !== location) {
         ctx.status = 400;
         return;
       }
@@ -46,6 +47,8 @@ module.exports = function webpages({ db }) {
 
     await collection.insertOne(newComment);
 
+    const responseBody = await getCommentResponseBody(db, newComment._id);
+    ctx.body = responseBody;
     ctx.status = 201;
   }
 };
