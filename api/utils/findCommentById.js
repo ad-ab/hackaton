@@ -1,3 +1,5 @@
+const cursor = require('./cursor');
+
 module.exports = async function findCommentById(db, id) {
   const collection = db.collection('comments');
 
@@ -18,7 +20,7 @@ module.exports = async function findCommentById(db, id) {
     replies: {
       pageInfo: {
         hasNextPage: false,
-        endCursor: '',
+        endCursor: cursor.encode(id || 0, comment.created),
       },
       edges: replies.map((reply) => ({
         cursor: reply._id,
