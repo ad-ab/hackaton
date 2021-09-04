@@ -106,7 +106,7 @@ function map(nodes) {
   return {
     pageInfo: {
       hasNextPage: true,
-      endCursor: 'string',
+      endCursor: nodes.length > 0 ? nodes[nodes.length - 1].id : null,
     },
     edges: nodes.map((item) => ({
       cursor: item.cursor,
