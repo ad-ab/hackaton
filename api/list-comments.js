@@ -79,7 +79,7 @@ module.exports = function ({ db }) {
 
     let result = await col.aggregate(mongoQuery).toArray();
 
-    var tree = { edges: [] };
+    var tree = [];
     for (var item of result) {
       item.children.sort((a, b) => {
         if (a.level > b.level) return 1;
@@ -95,12 +95,33 @@ module.exports = function ({ db }) {
         parent: item.parentId,
         created: item.created,
       });
-      tree.edges.push(createDataTree(item.children));
+      tree.push(createDataTree(item.children));
     }
 
-    ctx.body = tree;
+    ctx.body = map(tree);
   };
 };
+
+function map(nodes) {
+  return {
+    pageInfo: {
+      hasNextPage: true,
+      endCursor: 'string',
+    },
+    edges: nodes.map((item) => ({
+      cursor: item.cursor,
+      node: {
+        id: item.id,
+        author: item.author,
+        text: item.text,
+        parent: item.parent,
+        created: item.created,
+        repliesStartCursor: item.repliesStartCursor,
+        replies: map(item.children),
+      },
+    })),
+  };
+}
 
 function createDataTree(dataset) {
   const hashTable = Object.create(null);
@@ -109,22 +130,20 @@ function createDataTree(dataset) {
     (aData) =>
       (hashTable[aData._id] = {
         cursor: cursor.encode(aData.parentId || 0, aData.created),
-        node: {
-          id: aData._id,
-          author: aData.author,
-          text: aData.text,
-          parent: aData.parentId ? { id: aData.parentId } : null,
-          created: aData.created,
-          repliesStartCursor: cursor.encode(aData._id || 0, aData.created),
-          replies: [],
-        },
+        id: aData._id,
+        author: aData.author,
+        text: aData.text,
+        parent: aData.parentId ? { id: aData.parentId } : null,
+        created: aData.created,
+        repliesStartCursor: cursor.encode(aData._id || 0, aData.created),
+        children: [],
       })
   );
-  const dataTree = [];
+  let dataTree = {};
   dataset.forEach((aData) => {
     if (aData.parentId)
-      hashTable[aData.parentId].node.replies.push(hashTable[aData._id]);
-    else dataTree.push(hashTable[aData._id]);
+      hashTable[aData.parentId].children.push(hashTable[aData._id]);
+    else dataTree = hashTable[aData._id];
   });
   return dataTree;
 }
