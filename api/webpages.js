@@ -50,24 +50,24 @@ module.exports = function webpages({ db }) {
       replies3rdLevelLimit,
     } = ctx.request.query
 
+    let level = 1
+
     limit = parseInt(limit)
+
+    let paramsArray = [{ location }]
+
+    if (after === undefined) paramsArray.push({ level: 1 })
 
     let mongoQuery = [
       {
         $match: {
-          $and: [
-            // {
-            //   level: 1,
-            // },
-            {
-              location: location,
-            },
+          $and:
             // {
             //   created: {
             //     $gte: 1630709278772,
             //   },
             // },
-          ],
+            paramsArray,
         },
       },
       {
@@ -88,6 +88,7 @@ module.exports = function webpages({ db }) {
 
     let result = await col.aggregate(mongoQuery).toArray()
 
+    var tree = { edges: [] }
     for (var item of result) {
       item.children.sort((a, b) => {
         if (a.level > b.level) return 1
@@ -96,22 +97,47 @@ module.exports = function webpages({ db }) {
           return a.created > b.created ? 1 : b.created > a.created ? -1 : 0
         }
       })
-      item.tree = createDataTree(item.id, item.children)
+      item.children.push({
+        id: item.id,
+        author: item.author,
+        text: item.text,
+        parent: item.parent,
+        created: item.created,
+      })
+      tree.edges.push(createDataTree(item.children))
     }
 
-    ctx.status = 200
+    ctx.body = tree
   }
 
-  function createDataTree(rootId, dataset) {
+  function createDataTree(dataset) {
     const hashTable = Object.create(null)
-    dataset.push({ parent: { id: null }, id: rootId })
+    // dataset.push({ parent: { id: null }, id: rootId })
     dataset.forEach(
-      (aData) => (hashTable[aData.id] = { ...aData, childNodes: [] })
+      (aData) =>
+        (hashTable[aData.id] = {
+          cursor: Buffer.from(`${aData.parent.id}.${aData.created}`).toString(
+            'base64'
+          ),
+          node: {
+            id: aData.id,
+            author: aData.author,
+            text: aData.text,
+            parent: {
+              id: aData.parent.id,
+            },
+            created: aData.created,
+            repliesStartCursor: Buffer.from(
+              `${aData.id}.${aData.created}`
+            ).toString('base64'),
+            replies: [],
+          },
+        })
     )
     const dataTree = []
     dataset.forEach((aData) => {
       if (aData.parent.id)
-        hashTable[aData.parent.id].childNodes.push(hashTable[aData.id])
+        hashTable[aData.parent.id].node.replies.push(hashTable[aData.id])
       else dataTree.push(hashTable[aData.id])
     })
     return dataTree
