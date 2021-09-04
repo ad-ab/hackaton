@@ -37,6 +37,10 @@ module.exports = function ({ db }) {
     let level = 1;
 
     limit = parseInt(limit);
+    if (limit <= 0) {
+      ctx.status = 400;
+      return;
+    }
 
     let paramsArray = [{ location }];
 
