@@ -16,6 +16,12 @@ module.exports = function ({ db }) {
       return;
     }
 
+    const bytes = Buffer.byteLength(ctx.request.body.text, 'utf-8');
+    if (bytes > 128000 || bytes < 5) {
+      ctx.status = 400;
+      return;
+    }
+
     const collection = db.collection('comments');
     const { author, text, parent: parentId } = ctx.request.body;
     const { location } = ctx.params;
