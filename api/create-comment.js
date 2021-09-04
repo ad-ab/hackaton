@@ -1,16 +1,17 @@
 const { is, size, object, string, nullable } = require('superstruct');
 const { v4: uuid } = require('uuid');
 const cursor = require('./utils/cursor');
+const validate = require('./utils/validate');
 
 const CreateWepPageRequest = object({
   author: size(string(), 1, 36),
-  text: size(string(), 5, 128000),
+  text: string(),
   parent: nullable(size(string(), 1, 36)),
 });
 
 module.exports = function ({ db }) {
   return async function post(ctx) {
-    if (!is(ctx.request.body, CreateWepPageRequest)) {
+    if (!validate(ctx.request.body, CreateWepPageRequest, ctx)) {
       ctx.status = 400;
       return;
     }

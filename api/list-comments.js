@@ -1,6 +1,7 @@
 const { is, number, object, optional, string } = require('superstruct');
 const cursor = require('./utils/cursor');
 const { v4: uuid } = require('uuid');
+const validate = require('./utils/validate');
 
 module.exports = function ({ db }) {
   return async function get(ctx) {
@@ -13,14 +14,14 @@ module.exports = function ({ db }) {
     const queryParamsObject = object({
       limit: string(),
       after: optional(string()),
-      replies1stLevelLimit: optional(number()),
-      replies2ndLevelLimit: optional(number()),
-      replies3rdLevelLimit: optional(number()),
+      replies1stLevelLimit: optional(string()),
+      replies2ndLevelLimit: optional(string()),
+      replies3rdLevelLimit: optional(string()),
     });
 
     if (
-      !is(ctx.params, paramsObject) ||
-      !is(ctx.request.query, queryParamsObject)
+      !validate(ctx.params, paramsObject, ctx) ||
+      !validate(ctx.request.query, queryParamsObject, ctx)
     ) {
       ctx.status = 400;
       return;

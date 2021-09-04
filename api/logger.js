@@ -12,7 +12,7 @@ module.exports = async function logger(ctx, next) {
 
   if (!fs.existsSync(PATH)) fs.mkdirSync(PATH);
 
-  fs.appendFileSync(FILE_PATH_TXT, `${time}: ${ctx.method} ${ctx.url}\n`);
+  //   fs.appendFileSync(FILE_PATH_TXT, `${time}: ${ctx.method} ${ctx.url}\n`);
   fs.appendFileSync(
     FILE_PATH_CSV,
     csvStringify([
@@ -26,6 +26,9 @@ module.exports = async function logger(ctx, next) {
   );
 
   counter++;
+  //   if (counter === 68)
+  //     console.log(`${counter} ${ctx.method} ${ctx.url} ${ctx.url.body}`);
+  //   if (counter === 69) console.log(`${counter} ${ctx.method} ${ctx.url}`);
   if (!(counter % 100)) console.log(counter);
   return next();
 };
