@@ -105,15 +105,15 @@ function createDataTree(dataset) {
   dataset.forEach(
     (aData) =>
       (hashTable[aData.id] = {
-        cursor: Buffer.from(`${aData.parent.id}.${aData.created}`).toString(
-          'base64'
-        ),
+        cursor: Buffer.from(
+          `${aData.parent ? aData.parent.id : ''}.${aData.created}`
+        ).toString('base64'),
         node: {
           id: aData.id,
           author: aData.author,
           text: aData.text,
           parent: {
-            id: aData.parent.id,
+            id: aData.parent ? aData.parent.id : '',
           },
           created: aData.created,
           repliesStartCursor: Buffer.from(
@@ -125,7 +125,7 @@ function createDataTree(dataset) {
   );
   const dataTree = [];
   dataset.forEach((aData) => {
-    if (aData.parent.id)
+    if (aData.parent?.id)
       hashTable[aData.parent.id].node.replies.push(hashTable[aData.id]);
     else dataTree.push(hashTable[aData.id]);
   });
