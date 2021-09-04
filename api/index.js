@@ -22,10 +22,13 @@ const port = 8000;
 
   const col = db.collection('comments');
 
-  await col.createIndex({ parentId: 1, location: 1 });
-  await col.createIndex({ created: 1 });
-  await col.createIndex({ parentId: 1 });
-
+  try {
+    await col.createIndex({ parentId: 1, location: 1 });
+    await col.createIndex({ created: 1 });
+    await col.createIndex({ parentId: 1 });
+  } catch (err) {
+    console.error('Indexes already created');
+  }
   const state = { db };
 
   const routes = new Router()

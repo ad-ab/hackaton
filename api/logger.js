@@ -13,23 +13,23 @@ module.exports = async function logger(ctx, next) {
   if (!fs.existsSync(PATH)) fs.mkdirSync(PATH);
 
   //   fs.appendFileSync(FILE_PATH_TXT, `${time}: ${ctx.method} ${ctx.url}\n`);
-  fs.appendFileSync(
-    FILE_PATH_CSV,
-    csvStringify([
-      {
-        time,
-        method: ctx.method,
-        url: ctx.url,
-        body: ctx.request.body ? JSON.stringify(ctx.request.body) : '',
-      },
-    ])
-  );
+  //   fs.appendFileSync(
+  //     FILE_PATH_CSV,
+  //     csvStringify([
+  //       {
+  //         time,
+  //         method: ctx.method,
+  //         url: ctx.url,
+  //         body: ctx.request.body ? JSON.stringify(ctx.request.body) : '',
+  //       },
+  //     ])
+  //   );
 
-  counter++;
-  //   if (counter >= 88) {
+  //   counter++;
+  //   if (counter >= 94) {
   //     console.log(`${counter} ${ctx.method} ${ctx.url.substr(0, 50)} `);
   //   }
   //   if (counter === 69) console.log(`${counter} ${ctx.method} ${ctx.url}`);
-  if (!(counter % 100)) console.log(counter);
+  //   if (!(counter % 100)) console.log(counter);
   return next();
 };
