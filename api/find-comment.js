@@ -17,8 +17,7 @@ async function getCommentResponseBody(db, id) {
 
   const comment = await collection.findOne({ _id: id });
   if (!comment) {
-    ctx.status = 404;
-    return;
+    return null;
   }
 
   const replies = await collection.find({ parentId: id }).toArray();
