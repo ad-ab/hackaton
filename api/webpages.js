@@ -60,6 +60,10 @@ module.exports = function webpages({ db }) {
     let level = 1;
 
     limit = parseInt(limit);
+    if (limit <= 0) {
+      ctx.status = 400;
+      return;
+    }
 
     let paramsArray = [{ location }];
 
@@ -123,16 +127,14 @@ module.exports = function webpages({ db }) {
     dataset.forEach(
       (aData) =>
         (hashTable[aData.id] = {
-          cursor: Buffer.from(`${aData.parent.id}.${aData.created}`).toString(
-            'base64'
-          ),
+          cursor: Buffer.from(
+            `${aData.parent?.id || 0}.${aData.created}`
+          ).toString('base64'),
           node: {
             id: aData.id,
             author: aData.author,
             text: aData.text,
-            parent: {
-              id: aData.parent.id,
-            },
+            parent: aData.parent,
             created: aData.created,
             repliesStartCursor: Buffer.from(
               `${aData.id}.${aData.created}`
@@ -143,7 +145,7 @@ module.exports = function webpages({ db }) {
     );
     const dataTree = [];
     dataset.forEach((aData) => {
-      if (aData.parent.id)
+      if (aData.parent?.id)
         hashTable[aData.parent.id].node.replies.push(hashTable[aData.id]);
       else dataTree.push(hashTable[aData.id]);
     });
