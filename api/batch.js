@@ -2,7 +2,8 @@ const findCommentById = require('./utils/findCommentById');
 
 module.exports = function batch({ db }) {
   return async function (ctx) {
-    const batchResult = [];
+    const promises = [];
+
     for (let i = ctx.request.body.length - 1; i >= 0; i--) {
       const {
         id,
@@ -15,15 +16,12 @@ module.exports = function batch({ db }) {
       } = ctx.request.body[i];
 
       if (id) {
-        const comment = await findCommentById(db, id);
-        if (comment) {
-          batchResult.push(comment);
-        }
+        promises.push(findCommentById(db, id));
       } else {
         // TODO: Implement 'list-comments' logic here ...
       }
     }
 
-    ctx.body = batchResult;
+    ctx.body = await Promise.all(promises);
   };
 };
