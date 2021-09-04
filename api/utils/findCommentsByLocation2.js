@@ -134,6 +134,15 @@ module.exports = async function findCommentsByLocation(
       results.push(
         await col.aggregate(mongoQuery4, { allowDiskUse: true }).toArray()
       );
+
+      const mongoQuery5 = generateQuery(
+        results[3].map((x) => x._id),
+        parseInt(0)
+      );
+
+      results.push(
+        await col.aggregate(mongoQuery5, { allowDiskUse: true }).toArray()
+      );
     }
   }
 
@@ -147,6 +156,7 @@ module.exports = async function findCommentsByLocation(
   for (let node of results[1]) {
     node.children = [];
     hashTable[node.parentId].hasChildren = true;
+    node.hasChildren = false;
     hashTable[node._id] = node;
 
     if (maxlimit > 1) hashTable[node.parentId].children.push(node);
@@ -156,13 +166,20 @@ module.exports = async function findCommentsByLocation(
       node.children = [];
       hashTable[node._id] = node;
       hashTable[node.parentId].hasChildren = true;
+      node.hasChildren = false;
 
       if (maxlimit > 2) hashTable[node.parentId].children.push(node);
     }
     if (maxlimit > 2) {
       for (let node of results[3]) {
         hashTable[node._id] = node;
+        node.hasChildren = false;
         hashTable[node.parentId].children.push(node);
+      }
+
+      for (let node of results[4]) {
+        hashTable[node._id] = node;
+        hashTable[node.parentId].hasChildren = true;
       }
     }
   }
