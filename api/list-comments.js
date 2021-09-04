@@ -1,6 +1,6 @@
 const { is, number, object, optional, string } = require('superstruct');
 const validate = require('./utils/validate');
-const findCommentsByLocation = require('./utils/findCommentsByLocation');
+const findCommentsByLocation = require('./utils/findCommentsByLocation2');
 
 module.exports = function ({ db }) {
   return async function get(ctx) {
@@ -42,6 +42,15 @@ module.exports = function ({ db }) {
       return;
     }
 
-    ctx.body = await findCommentsByLocation(ctx, db, location, after, limit);
+    ctx.body = await findCommentsByLocation(
+      ctx,
+      db,
+      location,
+      after,
+      limit,
+      replies1stLevelLimit,
+      replies2ndLevelLimit,
+      replies3rdLevelLimit
+    );
   };
 };
