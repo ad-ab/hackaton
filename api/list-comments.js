@@ -48,7 +48,7 @@ module.exports = function ({ db }) {
   };
 };
 
-function map(nodes) {
+function map(nodes = []) {
   return {
     pageInfo: {
       hasNextPage: true,
