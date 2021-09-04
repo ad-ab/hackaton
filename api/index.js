@@ -1,12 +1,15 @@
 const Koa = require('koa');
 const app = new Koa();
 const bodyParser = require('koa-bodyparser');
+const Router = require('koa-router');
 const { MongoClient } = require('mongodb');
 
-const logger = require('./logger');
-const webpages = require('./webpages');
-const comments = require('./comments');
 const batch = require('./batch');
+const clearComments = require('./clear-comments');
+const createComment = require('./create-comment');
+const findComment = require('./find-comment');
+const listComments = require('./list-comments');
+const logger = require('./logger');
 
 const port = 8000;
 (async () => {
@@ -17,12 +20,20 @@ const port = 8000;
     useUnifiedTopology: true,
   }).then((client) => client.db());
 
+  const state = { db };
+
+  const routes = new Router()
+    .get('/comment/:id', findComment(state))
+    .get('/webpage/:location/comment', listComments(state))
+    .post('/webpage/:location/comment', createComment(state))
+    .post('/batch', batch(state))
+    .delete('/comment', clearComments(state))
+    .routes();
+
   app
     .use(bodyParser({ strict: false }))
     .use(logger)
-    .use(webpages({ db }))
-    .use(comments({ db }))
-    .use(batch({}));
+    .use(routes);
 
   app.listen(port);
 })()

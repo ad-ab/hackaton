@@ -1,4 +1,18 @@
-module.exports = async function getCommentResponseBody(db, id) {
+module.exports = function ({ db }) {
+  return async function get(ctx) {
+    const { id } = ctx.params;
+
+    const responseBody = await getCommentResponseBody(db, id);
+    if (!responseBody) {
+      ctx.status = 404;
+      return;
+    }
+
+    ctx.body = responseBody;
+  };
+};
+
+async function getCommentResponseBody(db, id) {
   const collection = db.collection('comments');
 
   const comment = await collection.findOne({ _id: id });
@@ -33,4 +47,4 @@ module.exports = async function getCommentResponseBody(db, id) {
       })),
     },
   };
-};
+}
