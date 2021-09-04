@@ -42,29 +42,6 @@ module.exports = function ({ db }) {
       return;
     }
 
-    let tree = await findCommentsByLocation(ctx, db, location, after, limit);
-
-    ctx.body = map(tree);
+    ctx.body = await findCommentsByLocation(ctx, db, location, after, limit);
   };
 };
-
-function map(nodes = []) {
-  return {
-    pageInfo: {
-      hasNextPage: true,
-      endCursor: nodes.length > 0 ? nodes[nodes.length - 1].id : null,
-    },
-    edges: nodes.map((item) => ({
-      cursor: item.cursor,
-      node: {
-        id: item.id,
-        author: item.author,
-        text: item.text,
-        parent: item.parent,
-        created: item.created,
-        repliesStartCursor: item.repliesStartCursor,
-        replies: map(item.children),
-      },
-    })),
-  };
-}

@@ -66,7 +66,7 @@ module.exports = async function findCommentsByLocation(
     });
     tree.push(createDataTree(item.children));
   }
-  return tree;
+  return map(tree);
 };
 
 function createDataTree(dataset) {
@@ -91,4 +91,25 @@ function createDataTree(dataset) {
     else dataTree = hashTable[aData._id];
   });
   return dataTree;
+}
+
+function map(nodes = []) {
+  return {
+    pageInfo: {
+      hasNextPage: true,
+      endCursor: nodes.length > 0 ? nodes[nodes.length - 1].id : null,
+    },
+    edges: nodes.map((item) => ({
+      cursor: item.cursor,
+      node: {
+        id: item.id,
+        author: item.author,
+        text: item.text,
+        parent: item.parent,
+        created: item.created,
+        repliesStartCursor: item.repliesStartCursor,
+        replies: map(item.children),
+      },
+    })),
+  };
 }
