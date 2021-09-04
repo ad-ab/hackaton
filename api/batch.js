@@ -19,7 +19,7 @@ module.exports = function batch({ db }) {
       if (id) {
         promises.push(findCommentById(db, id));
       } else {
-        promises.push(findCommentsByLocation(db, location, after, limit));
+        promises.push(findCommentsByLocation(ctx, db, location, after, limit));
       }
     }
 

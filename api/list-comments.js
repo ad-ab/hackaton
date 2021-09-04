@@ -42,7 +42,7 @@ module.exports = function ({ db }) {
       return;
     }
 
-    let tree = await findCommentsByLocation(db, location, after, limit);
+    let tree = await findCommentsByLocation(ctx, db, location, after, limit);
 
     ctx.body = map(tree);
   };

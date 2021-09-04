@@ -1,6 +1,7 @@
 const cursor = require('./cursor');
 
 module.exports = async function findCommentsByLocation(
+  ctx,
   db,
   location,
   after,
