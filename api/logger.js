@@ -20,14 +20,15 @@ module.exports = async function logger(ctx, next) {
         time,
         method: ctx.method,
         url: ctx.url,
-        // body: ctx.request.body ? JSON.stringify(ctx.request.body) : '',
+        body: ctx.request.body ? JSON.stringify(ctx.request.body) : '',
       },
     ])
   );
 
   counter++;
-  //   if (counter === 68)
-  //     console.log(`${counter} ${ctx.method} ${ctx.url} ${ctx.url.body}`);
+  if (counter > 70) {
+    console.log(`${counter} ${ctx.method} ${ctx.url}}`);
+  }
   //   if (counter === 69) console.log(`${counter} ${ctx.method} ${ctx.url}`);
   if (!(counter % 100)) console.log(counter);
   return next();

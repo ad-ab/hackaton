@@ -138,12 +138,6 @@ module.exports = async function findCommentsByLocation(
   }
 
   let hashTable = {};
-  let level0HasMore = false;
-
-  if (results[0] && results[0].length >= limit) {
-    results[0].pop();
-    level0HasMore = true;
-  }
 
   for (let node of results[0]) {
     node.children = [];
@@ -186,6 +180,13 @@ module.exports = async function findCommentsByLocation(
         }
       }
     }
+  }
+
+  let level0HasMore = false;
+
+  if (results[0] && results[0].length >= limit) {
+    results[0].pop();
+    level0HasMore = true;
   }
 
   return map(level0HasMore, results[0]);
