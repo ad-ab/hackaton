@@ -140,7 +140,7 @@ module.exports = async function findCommentsByLocation(
   let hashTable = {};
   let level0HasMore = false;
 
-  if (results[0] && results[0].length == limit + 1) {
+  if (results[0] && results[0].length >= limit) {
     results[0].pop();
     level0HasMore = true;
   }
