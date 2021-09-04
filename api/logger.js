@@ -26,9 +26,9 @@ module.exports = async function logger(ctx, next) {
   );
 
   counter++;
-  if (counter > 70) {
-    console.log(`${counter} ${ctx.method} ${ctx.url}}`);
-  }
+  //   if (counter >= 88) {
+  //     console.log(`${counter} ${ctx.method} ${ctx.url.substr(0, 50)} `);
+  //   }
   //   if (counter === 69) console.log(`${counter} ${ctx.method} ${ctx.url}`);
   if (!(counter % 100)) console.log(counter);
   return next();

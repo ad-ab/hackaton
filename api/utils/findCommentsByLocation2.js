@@ -66,7 +66,9 @@ module.exports = async function findCommentsByLocation(
       ctx.status = 400;
       return;
     }
-    paramsArray.push({ parentId: afterParams[0] });
+    paramsArray.push({
+      parentId: afterParams[0] === '0' ? null : afterParams[0],
+    });
     paramsArray.push({ created: { $gt: parseInt(afterParams[1]) } });
   }
 
@@ -184,7 +186,7 @@ module.exports = async function findCommentsByLocation(
 
   let level0HasMore = false;
 
-  if (results[0] && results[0].length >= limit) {
+  if (results[0] && results[0].length > limit) {
     results[0].pop();
     level0HasMore = true;
   }
