@@ -17,7 +17,7 @@ module.exports = function ({ db }) {
     }
 
     const bytes = Buffer.byteLength(ctx.request.body.text, 'utf-8');
-    if (bytes > 128000 || bytes < 5) {
+    if (bytes > 131072 || bytes < 5) {
       ctx.status = 400;
       return;
     }
