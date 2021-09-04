@@ -24,7 +24,9 @@ const port = 8000;
 
   const routes = new Router()
     .get('/comment/:id', findComment(state))
+    .get('/webpage//comment', (ctx) => (ctx.status = 400))
     .get('/webpage/:location/comment', listComments(state))
+    .post('/webpage//comment', (ctx) => (ctx.status = 400))
     .post('/webpage/:location/comment', createComment(state))
     .post('/batch', batch(state))
     .delete('/comment', clearComments(state))
