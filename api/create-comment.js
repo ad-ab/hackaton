@@ -1,7 +1,10 @@
-const { is, size, object, string, nullable } = require('superstruct');
+const { createHash } = require('crypto');
+const { size, object, string, nullable } = require('superstruct');
 const { v4: uuid } = require('uuid');
 const cursor = require('./utils/cursor');
 const validate = require('./utils/validate');
+
+const ids = new Map();
 
 const CreateWepPageRequest = object({
   author: size(string(), 1, 36),
@@ -10,6 +13,8 @@ const CreateWepPageRequest = object({
 });
 
 module.exports = function ({ db }) {
+  const collection = db.collection('comments');
+
   return async function post(ctx) {
     if (!validate(ctx.request.body, CreateWepPageRequest, ctx)) {
       ctx.status = 400;
@@ -22,16 +27,15 @@ module.exports = function ({ db }) {
       return;
     }
 
-    const collection = db.collection('comments');
     const { author, text, parent: parentId } = ctx.request.body;
     const { location } = ctx.params;
 
     if (parentId) {
-      const parent = await collection.findOne({ _id: parentId });
-      if (!parent || parent.location !== location) {
-        ctx.status = 400;
-        return;
-      }
+      const oldHash = ids.get(parentId);
+      ctx.assert(oldHash, 400);
+
+      const newHash = createHash('sha1').update(location).digest('base64');
+      ctx.assert(newHash === oldHash, 400);
     }
 
     const comment = {
@@ -44,6 +48,8 @@ module.exports = function ({ db }) {
     };
 
     await collection.insertOne(comment);
+
+    ids.set(comment._id, createHash('sha1').update(location).digest('base64'));
 
     ctx.body = {
       id: comment._id,
