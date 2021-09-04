@@ -1,4 +1,6 @@
 const { is, number, object, optional, string } = require('superstruct');
+const cursor = require('./utils/cursor');
+const { v4: uuid } = require('uuid');
 
 module.exports = function ({ db }) {
   return async function get(ctx) {
@@ -44,7 +46,7 @@ module.exports = function ({ db }) {
 
     let paramsArray = [{ location }];
 
-    if (after === undefined) paramsArray.push({ level: 1 });
+    if (after === undefined) paramsArray.push({ parentId: null });
 
     let mongoQuery = [
       {
@@ -61,12 +63,12 @@ module.exports = function ({ db }) {
       {
         $graphLookup: {
           from: 'comments',
-          startWith: '$id',
-          connectFromField: 'id',
-          connectToField: 'parent.id',
+          startWith: '$_id',
+          connectFromField: '_id',
+          connectToField: 'parentId',
           as: 'children',
           maxDepth: 2,
-          depthField: 'calculatedLevel',
+          depthField: 'level',
         },
       },
       {
@@ -86,10 +88,10 @@ module.exports = function ({ db }) {
         }
       });
       item.children.push({
-        id: item.id,
+        _id: item._id,
         author: item.author,
         text: item.text,
-        parent: item.parent,
+        parent: item.parentId,
         created: item.created,
       });
       tree.edges.push(createDataTree(item.children));
@@ -104,30 +106,24 @@ function createDataTree(dataset) {
   // dataset.push({ parent: { id: null }, id: rootId })
   dataset.forEach(
     (aData) =>
-      (hashTable[aData.id] = {
-        cursor: Buffer.from(
-          `${aData.parent ? aData.parent.id : ''}.${aData.created}`
-        ).toString('base64'),
+      (hashTable[aData._id] = {
+        cursor: cursor.encode(aData.parentId || 0, aData.created),
         node: {
-          id: aData.id,
+          id: aData._id,
           author: aData.author,
           text: aData.text,
-          parent: {
-            id: aData.parent ? aData.parent.id : '',
-          },
+          parent: aData.parentId ? { id: aData.parentId } : null,
           created: aData.created,
-          repliesStartCursor: Buffer.from(
-            `${aData.id}.${aData.created}`
-          ).toString('base64'),
+          repliesStartCursor: cursor.encode(aData._id || 0, aData.created),
           replies: [],
         },
       })
   );
   const dataTree = [];
   dataset.forEach((aData) => {
-    if (aData.parent?.id)
-      hashTable[aData.parent.id].node.replies.push(hashTable[aData.id]);
-    else dataTree.push(hashTable[aData.id]);
+    if (aData.parentId)
+      hashTable[aData.parentId].node.replies.push(hashTable[aData._id]);
+    else dataTree.push(hashTable[aData._id]);
   });
   return dataTree;
 }
