@@ -48,17 +48,20 @@ module.exports = function ({ db }) {
     let paramsArray = [{ location }];
 
     if (after === undefined) paramsArray.push({ parentId: null });
+    else {
+      var afterParams = cursor.decode(after);
+      if (afterParams.length != 2) {
+        ctx.status = 400;
+        return;
+      }
+      paramsArray.push({ parentId: afterParams[0] });
+      paramsArray.push({ created: { $gt: parseInt(afterParams[1]) } });
+    }
 
     let mongoQuery = [
       {
         $match: {
-          $and:
-            // {
-            //   created: {
-            //     $gte: 1630709278772,
-            //   },
-            // },
-            paramsArray,
+          $and: paramsArray,
         },
       },
       {
