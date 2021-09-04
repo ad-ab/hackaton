@@ -80,7 +80,9 @@ module.exports = function ({ db }) {
       },
     ];
 
-    let result = await col.aggregate(mongoQuery).toArray();
+    let result = await col
+      .aggregate(mongoQuery, { allowDiskUse: true })
+      .toArray();
 
     var tree = [];
     for (var item of result) {
