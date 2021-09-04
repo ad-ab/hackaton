@@ -1,4 +1,5 @@
 const findCommentById = require('./utils/findCommentById');
+const findCommentsByLocation = require('./utils/findCommentsByLocation');
 
 module.exports = function batch({ db }) {
   return async function (ctx) {
@@ -18,7 +19,7 @@ module.exports = function batch({ db }) {
       if (id) {
         promises.push(findCommentById(db, id));
       } else {
-        // TODO: Implement 'list-comments' logic here ...
+        promises.push(findCommentsByLocation(db, location, after, limit));
       }
     }
 
