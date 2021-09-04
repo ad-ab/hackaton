@@ -20,6 +20,12 @@ const port = 8000;
     useUnifiedTopology: true,
   }).then((client) => client.db());
 
+  const col = db.collection('comments');
+
+  await col.createIndex({ parentId: 1, location: 1 });
+  await col.createIndex({ created: 1 });
+  await col.createIndex({ parentId: 1 });
+
   const state = { db };
 
   const routes = new Router()
