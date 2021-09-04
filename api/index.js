@@ -8,7 +8,7 @@ const webpages = require('./webpages');
 const comments = require('./comments');
 const batch = require('./batch');
 
-const port = process.env.NODE_ENV === 'production' ? 80 : 8000;
+const port = 8000;
 (async () => {
   const dbUrl = process.env.APP_DB_URL || 'mongodb://localhost:27017';
 
