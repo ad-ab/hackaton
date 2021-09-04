@@ -92,7 +92,7 @@ module.exports = async function findCommentsByLocation(
       },
     },
     {
-      $limit: limit,
+      $limit: limit + 1,
     },
     {
       $sort: {
@@ -134,75 +134,85 @@ module.exports = async function findCommentsByLocation(
       results.push(
         await col.aggregate(mongoQuery4, { allowDiskUse: true }).toArray()
       );
-
-      const mongoQuery5 = generateQuery(
-        results[3].map((x) => x._id),
-        parseInt(0)
-      );
-
-      results.push(
-        await col.aggregate(mongoQuery5, { allowDiskUse: true }).toArray()
-      );
     }
   }
 
   let hashTable = {};
+  let level0HasMore = false;
+
+  if (results[0] && results[0].length == limit + 1) {
+    results[0].pop();
+    level0HasMore = true;
+  }
 
   for (let node of results[0]) {
     node.children = [];
-    node.hasChildren = false;
     hashTable[node._id] = node;
   }
   for (let node of results[1]) {
     node.children = [];
-    hashTable[node.parentId].hasChildren = true;
-    node.hasChildren = false;
+
     hashTable[node._id] = node;
 
-    if (maxlimit > 1) hashTable[node.parentId].children.push(node);
+    if (maxlimit > 1) {
+      if (hashTable[node.parentId].children.length >= limit1) {
+        hashTable[node.parentId].hasMore = true;
+      } else {
+        hashTable[node.parentId].children.push(node);
+      }
+    }
   }
   if (maxlimit > 1) {
     for (let node of results[2]) {
       node.children = [];
       hashTable[node._id] = node;
-      hashTable[node.parentId].hasChildren = true;
-      node.hasChildren = false;
 
-      if (maxlimit > 2) hashTable[node.parentId].children.push(node);
+      if (maxlimit > 2) {
+        if (hashTable[node.parentId].children.length >= limit2) {
+          hashTable[node.parentId].hasMore = true;
+        } else {
+          hashTable[node.parentId].children.push(node);
+        }
+      }
     }
     if (maxlimit > 2) {
       for (let node of results[3]) {
         hashTable[node._id] = node;
-        node.hasChildren = false;
-        hashTable[node.parentId].children.push(node);
-      }
 
-      for (let node of results[4]) {
-        hashTable[node._id] = node;
-        hashTable[node.parentId].hasChildren = true;
+        if (hashTable[node.parentId].children.length >= limit3) {
+          hashTable[node.parentId].hasMore = true;
+        } else {
+          hashTable[node.parentId].children.push(node);
+        }
       }
     }
   }
 
-  return map(results[0]);
+  return map(level0HasMore, results[0]);
 };
 
-function map(nodes = []) {
+function map(hasMore, nodes = []) {
   return {
     pageInfo: {
-      hasNextPage: true,
-      endCursor: nodes.length > 0 ? nodes[nodes.length - 1].id : null,
+      hasNextPage: hasMore,
+      endCursor:
+        nodes.length > 0
+          ? cursor.encode(
+              nodes[nodes.length - 1]._id,
+              nodes[nodes.length - 1].created
+            )
+          : null,
     },
     edges: nodes.map((item) => ({
-      cursor: item.cursor,
+      cursor: cursor.encode(item.parentId || 0, item.created),
       node: {
-        id: item.id,
+        id: item._id,
         author: item.author,
         text: item.text,
-        parent: item.parent,
+        parent: item.parentId ? { id: item.parentId } : null,
         created: item.created,
-        repliesStartCursor: item.repliesStartCursor,
-        replies: map(item.children),
+        repliesStartCursor: cursor.encode(item._id || 0, item.created),
+        replies: map(item.hasMore || false, item.children),
       },
     })),
   };
