@@ -20,6 +20,9 @@ module.exports = function comments({ db }) {
   }
 
   async function remove(ctx) {
-    ctx.status = 200;
+    const collection = db.collection('comments');
+    await collection.deleteMany();
+
+    ctx.status = 204;
   }
 };
